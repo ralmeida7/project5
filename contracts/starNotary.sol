@@ -9,7 +9,12 @@ contract StarNotary is ERC721 {
     }
 
 //  Add a name and a symbol for your starNotary tokens
-
+    function name() public view returns (string name) {
+        name = "Borrego Token";
+    }
+    function symbol() public view returns (string symbol) {
+        symbol = "BRT";
+    }
 //
 
     mapping(uint256 => Star) public tokenIdToStarInfo;
@@ -24,7 +29,9 @@ contract StarNotary is ERC721 {
     }
 
 // Add a function lookUptokenIdToStarInfo, that looks up the stars using the Token ID, and then returns the name of the star.
-
+    function lookUptokenIdToStarInfo(uint256 _tokenId) public view returns (string starName) {
+        starName = tokenIdToStarInfo[_tokenId].name;
+    }
 //
 
     function putStarUpForSale(uint256 _tokenId, uint256 _price) public {
@@ -49,15 +56,29 @@ contract StarNotary is ERC721 {
             msg.sender.transfer(msg.value - starCost);
         }
         starsForSale[_tokenId] = 0;
-      }
+    }
 
 // Add a function called exchangeStars, so 2 users can exchange their star tokens...
 //Do not worry about the price, just write code to exchange stars between users.
+    function exchangeStars(address _owner1, uint256 _tokenId1, address _owner2, uint256 _tokenId2) public {
+        require(ownerOf(_tokenId1) == _owner1, "Not owner 1");
+        require(ownerOf(_tokenId2) == _owner2, "Not owner 2");
+        _removeTokenFrom(_owner1, _tokenId1);
+        _addTokenTo(_owner2, _tokenId1);
+        emit Transfer(_owner2, _owner1, _tokenId2);
+        _removeTokenFrom(_owner2, _tokenId2);
+        _addTokenTo(_owner1, _tokenId2);
+        emit Transfer(_owner2, _owner1, _tokenId2);
 
+    }
 //
 
 // Write a function to Transfer a Star. The function should transfer a star from the address of the caller.
 // The function should accept 2 arguments, the address to transfer the star to, and the token ID of the star.
 //
+    function transferStar(address _to, uint256 _tokenId) public payable {
+        require(ownerOf(_tokenId) == msg.sender);
+        safeTransferFrom(msg.sender, _to, _tokenId);
+    }
 
 }
