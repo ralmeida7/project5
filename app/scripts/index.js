@@ -26,9 +26,38 @@ const createStar = async () => {
 }
 
 // Add a function lookUp to Lookup a star by ID using tokenIdToStarInfo()
+const lookupStar = async () => {
+  const instance = await StarNotary.deployed();
+  const id = document.getElementById("starId2").value;
+  const starName = await instance.tokenIdToStarInfo(id, {from: account});
+  App.setStarName(starName == '' ? "Not Found Star ID = " + id : "Star name is " + starName + ".");
+}
 
 //
-
+const transferStar = async () => {
+  const instance = await StarNotary.deployed();
+  const to = document.getElementById("to").value;
+  const id = document.getElementById("starId3").value;
+  
+  let owner = await instance.ownerOf.call(id);
+  let message = '';
+  console.log('owner = ' + owner);
+  console.log('account = ' + account);
+  if (account.toUpperCase() != owner.toUpperCase()) {
+    message = 'The star do not belongs to you'
+  } else {
+    await instance.transferStar(to, id, {from: account});
+    owner = await instance.ownerOf.call(id);
+    console.log('owner = ' + owner);
+    console.log('to = ' + to);
+    if (owner.toUpperCase() == to.toUpperCase()) {
+      message = "Transaction successful!"
+    } else {
+      message = "Transaction failed!";
+    }
+  }
+  App.setTransferMessage(message);
+}
 const App = {
   start: function () {
     const self = this
@@ -59,9 +88,27 @@ const App = {
     status.innerHTML = message
   },
 
+  setStarName: function (message) {
+    const starName = document.getElementById('starNameLabel')
+    starName.innerHTML = message
+  },
+
+  setTransferMessage: function (message) {
+    const transfer = document.getElementById('transferResult')
+    transfer.innerHTML = message
+  },
+
   createStar: function () {
     createStar();
   },
+
+  lookupStar: function () {
+    lookupStar();
+  },
+
+  transferStar: function () {
+    transferStar();
+  }
 
 }
 
